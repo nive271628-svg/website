@@ -70,64 +70,65 @@ body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--dark);o
 #splash{
   position:fixed;inset:0;z-index:9999;
   background:var(--cream);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:18px;
-  transition:opacity 0.6s ease, visibility 0.6s ease;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
 }
-#splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
-.splash-logo-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
-.splash-ring{
-  position:absolute;
-  width:160px;height:160px;
-  border-radius:50%;
-  border:2px solid transparent;
-  border-top-color:var(--rose);
-  border-right-color:var(--rose);
-  animation:splashSpin 1.4s cubic-bezier(0.6,0.2,0.4,0.9) infinite;
+#splash.hide{ display:none; }
+/* Curtain wipe */
+.splash-curtain{
+  position:fixed;inset:0;
+  background:var(--cream);
+  z-index:9998;
+  transform-origin:top;
+  animation:curtainReveal 1s cubic-bezier(0.77,0,0.18,1) 2s forwards;
 }
-.splash-ring:nth-child(2){
-  width:130px;height:130px;
-  border-top-color:var(--gold);
-  border-right-color:transparent;
-  border-left-color:var(--gold);
-  animation-duration:1.8s;animation-direction:reverse;
+@keyframes curtainReveal{
+  0%  {transform:scaleY(1);}
+  100%{transform:scaleY(0);}
 }
-@keyframes splashSpin{to{transform:rotate(360deg);}}
-.splash-text{
+/* Logo rise */
+.splash-scene{
+  position:relative;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.splash-logo{
   font-family:'Cormorant Garamond',serif;
-  font-size:52px;font-weight:700;font-style:italic;
+  font-size:clamp(72px,14vw,120px);
+  font-weight:700;font-style:italic;
   color:var(--deep);
-  letter-spacing:-1px;
-  animation:splashPop 0.9s cubic-bezier(0.22,1,0.36,1) both;
-  animation-delay:0.15s;
+  letter-spacing:0.01em;line-height:1;
+  position:relative;display:inline-block;
+  opacity:0;transform:translateY(40px) scale(0.9);filter:blur(8px);
+  animation:logoRise 0.9s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
 }
-@keyframes splashPop{
-  0%{opacity:0;transform:scale(0.7);}
-  100%{opacity:1;transform:scale(1);}
+@keyframes logoRise{
+  0%  {opacity:0;transform:translateY(40px) scale(0.9);filter:blur(8px);}
+  100%{opacity:1;transform:translateY(0)   scale(1);  filter:blur(0);}
+}
+/* Shimmer sweep overlay */
+.splash-logo::after{
+  content:'Lucky';
+  position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,230,200,0.6) 50%,transparent 70%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;pointer-events:none;
+  animation:shimmerSweep 2s linear 1.4s infinite;
+}
+@keyframes shimmerSweep{
+  0%  {background-position:-100% 0;}
+  100%{background-position:200%  0;}
 }
 .splash-tagline{
   font-family:'Outfit',sans-serif;
-  font-size:13px;font-weight:400;
-  color:var(--light);
-  letter-spacing:3px;
-  text-transform:uppercase;
-  animation:splashFadeUp 0.7s ease both;
-  animation-delay:0.6s;
+  font-size:12px;font-weight:400;
+  color:var(--light);letter-spacing:4px;text-transform:uppercase;
+  opacity:0;
+  animation:splashFadeUp 0.7s ease 0.9s forwards;
 }
 @keyframes splashFadeUp{
-  0%{opacity:0;transform:translateY(12px);}
+  0%  {opacity:0;transform:translateY(10px);}
   100%{opacity:1;transform:translateY(0);}
-}
-.splash-bar{
-  width:0;height:2px;
-  background:linear-gradient(90deg,var(--deep),var(--rose),var(--gold));
-  border-radius:2px;
-  animation:splashBarGrow 1.6s ease both;
-  animation-delay:0.3s;
-}
-@keyframes splashBarGrow{
-  0%{width:0;}
-  100%{width:140px;}
 }
 
 /* NAV */
@@ -545,13 +546,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
 
 <!-- ===== SPLASH SCREEN ===== -->
 <div id="splash">
-  <div class="splash-logo-wrap">
-    <div class="splash-ring"></div>
-    <div class="splash-ring"></div>
-    <div class="splash-text">Lucky</div>
+  <div class="splash-curtain"></div>
+  <div class="splash-scene">
+    <span class="splash-logo">Lucky</span>
+    <div class="splash-tagline">Discover Everything</div>
   </div>
-  <div class="splash-bar"></div>
-  <div class="splash-tagline">Discover Everything</div>
 </div>
 
 <!-- NAV -->
@@ -1830,12 +1829,10 @@ renderHomeGrids();
 (function(){
   const splash = document.getElementById('splash');
   if(!splash) return;
-  // Hide splash after 2.2s — enough time for all animations to complete
+  // Wait for curtain wipe to finish (2s delay + 1s animation = 3s)
   setTimeout(function(){
     splash.classList.add('hide');
-    // Remove from DOM after fade-out transition finishes
-    setTimeout(function(){ splash.remove(); }, 650);
-  }, 2200);
+  }, 3100);
 })();
 </script>
 </body>
