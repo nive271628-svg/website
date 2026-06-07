@@ -46,7 +46,7 @@
     window._currentUser = user;
     const loginBtn = document.getElementById('auth-nav-btn');
     if (user) {
-      const displayName = user.displayName || user.email.split('@')[0];
+      const displayName = user.displayName || localStorage.getItem('lucky_name_' + user.email) || user.email.split('@')[0];
       if (loginBtn) { loginBtn.textContent = '👤 ' + displayName.split(' ')[0]; }
       updateProfileUI(user);
     } else {
@@ -66,16 +66,75 @@
 }
 body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;}
 
-/* OFFER BAR */
-.offer-bar{background:linear-gradient(90deg,var(--deep),var(--rose),var(--gold),var(--rose),var(--deep));background-size:300% 100%;animation:barShift 6s ease infinite;color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:500;letter-spacing:0.5px;position:relative;overflow:hidden;}
-@keyframes barShift{0%,100%{background-position:0%}50%{background-position:100%}}
-.offer-bar span{opacity:0.7;margin:0 16px;}
+/* ===== SPLASH SCREEN ===== */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--cream);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;
+  transition:opacity 0.6s ease, visibility 0.6s ease;
+}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-logo-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+.splash-ring{
+  position:absolute;
+  width:160px;height:160px;
+  border-radius:50%;
+  border:2px solid transparent;
+  border-top-color:var(--rose);
+  border-right-color:var(--rose);
+  animation:splashSpin 1.4s cubic-bezier(0.6,0.2,0.4,0.9) infinite;
+}
+.splash-ring:nth-child(2){
+  width:130px;height:130px;
+  border-top-color:var(--gold);
+  border-right-color:transparent;
+  border-left-color:var(--gold);
+  animation-duration:1.8s;animation-direction:reverse;
+}
+@keyframes splashSpin{to{transform:rotate(360deg);}}
+.splash-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:52px;font-weight:700;font-style:italic;
+  color:var(--deep);
+  letter-spacing:-1px;
+  animation:splashPop 0.9s cubic-bezier(0.22,1,0.36,1) both;
+  animation-delay:0.15s;
+}
+@keyframes splashPop{
+  0%{opacity:0;transform:scale(0.7);}
+  100%{opacity:1;transform:scale(1);}
+}
+.splash-tagline{
+  font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:400;
+  color:var(--light);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  animation:splashFadeUp 0.7s ease both;
+  animation-delay:0.6s;
+}
+@keyframes splashFadeUp{
+  0%{opacity:0;transform:translateY(12px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+.splash-bar{
+  width:0;height:2px;
+  background:linear-gradient(90deg,var(--deep),var(--rose),var(--gold));
+  border-radius:2px;
+  animation:splashBarGrow 1.6s ease both;
+  animation-delay:0.3s;
+}
+@keyframes splashBarGrow{
+  0%{width:0;}
+  100%{width:140px;}
+}
 
 /* NAV */
 nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(212,99,122,0.15);}
 .nav-top{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;gap:16px;}
-.logo{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--dark);cursor:pointer;letter-spacing:-0.5px;}
-.logo em{color:var(--rose);font-style:italic;}
+.logo{display:flex;align-items:center;cursor:pointer;transition:.3s;}
+.logo:hover{transform:scale(1.08);}
 .nav-search{flex:1;max-width:480px;position:relative;}
 .nav-search input{width:100%;padding:11px 48px 11px 18px;border-radius:28px;border:1.5px solid rgba(212,99,122,0.25);background:var(--warm);font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:.2s;color:var(--dark);}
 .nav-search input:focus{border-color:var(--rose);background:white;}
@@ -335,7 +394,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
     flex-wrap:wrap;
     gap:8px;
   }
-  .logo{font-size:22px;flex-shrink:0;}
+  .logo{flex-shrink:0;}
   /* Hide search bar on mobile - use AI stylist instead */
   .nav-search{display:none;}
   .nav-actions{gap:6px;margin-left:auto;}
@@ -479,13 +538,24 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
   .prod-grid{grid-template-columns:1fr;}
   .offers-strip{grid-template-columns:1fr;}
   .wl-grid{grid-template-columns:1fr;}
-  .logo{font-size:20px;}
+  .logo{width:90px;}
   .hero h1{font-size:26px;}
   .dept-btn{padding:8px 10px;font-size:10px;}
 }
 </style>
 </head>
 <body>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div id="splash">
+  <div class="splash-logo-wrap">
+    <div class="splash-ring"></div>
+    <div class="splash-ring"></div>
+    <div class="splash-text">Lucky</div>
+  </div>
+  <div class="splash-bar"></div>
+  <div class="splash-tagline">Discover Everything</div>
+</div>
 
 <!-- OFFER BAR -->
 <div class="offer-bar">
@@ -501,7 +571,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
 <!-- NAV -->
 <nav>
   <div class="nav-top">
-    <div class="logo" onclick="goHome()">Lucky<em>✦</em></div>
+    <div class="logo" onclick="goHome()">
+      <svg width="120" height="44" viewBox="0 0 120 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lucky">
+        <text x="0" y="36" font-family="Cormorant Garamond, Georgia, serif" font-size="38" font-weight="700" font-style="italic" fill="#8B2035" letter-spacing="-1">Lucky</text>
+      </svg>
+    </div>
     <div class="nav-search">
       <input id="nav-search-input" placeholder="Search across all departments…" onkeydown="if(event.key==='Enter')navSearch()"/>
       <button onclick="navSearch()">Search</button>
@@ -518,10 +592,10 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
     <button class="dept-btn d-men" onclick="setDept('men',this)">👔 Men</button>
     <button class="dept-btn d-kids" onclick="setDept('kids',this)">🎒 Kids</button>
     <button class="dept-btn d-home" onclick="setDept('home',this)">🏠 Home & Decor</button>
+    <button class="dept-btn" onclick="showPage('ai')">✨ AI Stylist</button>
     <button class="dept-btn" onclick="filterAndGo('Accessories')">💍 Accessories</button>
     <button class="dept-btn" onclick="filterAndGo('Beauty')">💄 Beauty</button>
     <button class="dept-btn" onclick="filterAndGo('Electronics')">📱 Electronics</button>
-    <button class="dept-btn" onclick="showPage('ai')">✨ AI Stylist</button>
   </div>
 </nav>
 
@@ -533,7 +607,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
   <div class="modal-box" style="position:relative;">
     <div class="modal-top">
       <button class="modal-close" onclick="closeLogin()">✕</button>
-      <div class="modal-logo">Lucky<em>✦</em></div>
+      <div class="modal-logo">
+        <svg width="110" height="40" viewBox="0 0 110 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lucky">
+          <text x="0" y="33" font-family="Cormorant Garamond, Georgia, serif" font-size="34" font-weight="700" font-style="italic" fill="#f4b8c4" letter-spacing="-1">Lucky</text>
+        </svg>
+      </div>
       <p>Your one-stop fashion destination</p>
     </div>
     <div class="modal-tabs">
@@ -750,17 +828,6 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,243,0.95);backdrop
   </div>
   <div class="chat-input-bar">
     <div class="cib-inner">
-      <div class="cib-keys">
-        <span style="font-size:12px;color:var(--light);margin-right:4px;align-self:center;">Quick:</span>
-        <button class="key-btn" onclick="quickAsk('Pink dress under ₹1500')">👗 Pink dress ₹1500</button>
-        <button class="key-btn" onclick="quickAsk('Men formal shirt under ₹800')">👔 Men formal shirt</button>
-        <button class="key-btn" onclick="quickAsk('Kids party outfit')">🎒 Kids party outfit</button>
-        <button class="key-btn" onclick="quickAsk('Home decor ideas under ₹2000')">🏠 Home decor</button>
-        <button class="key-btn" onclick="quickAsk('Wedding outfit for women under ₹3000')">💍 Wedding outfit</button>
-        <button class="key-btn" onclick="quickAsk('Running shoes for men')">👟 Running shoes</button>
-        <button class="key-btn" onclick="quickAsk('Baby products under ₹500')">👶 Baby products</button>
-        <button class="key-btn" onclick="quickAsk('College bag under ₹600')">🎒 College bag</button>
-      </div>
       <div class="cib-row">
         <button class="key-icon-btn" title="Voice">🎤</button>
         <input id="chat-input" placeholder="Describe what you're looking for…" onkeydown="if(event.key==='Enter')sendChat()"/>
@@ -1390,6 +1457,8 @@ async function doRegister(){
   try {
     const cred = await window._fbFns.createUserWithEmailAndPassword(window._fbAuth, email, pass);
     await window._fbFns.updateProfile(cred.user, { displayName: name });
+    // Save name locally so it survives sign-out/sign-in
+    localStorage.setItem('lucky_name_' + email, name);
     closeLogin();
     showToast('Account created! Welcome 🎉');
   } catch(e){
@@ -1451,7 +1520,7 @@ function updateProfileUI(user){
   if(user){
     guestEl.style.display='none';
     userEl.style.display='block';
-    const name = user.displayName || user.email.split('@')[0];
+    const name = user.displayName || localStorage.getItem('lucky_name_' + user.email) || user.email.split('@')[0];
     document.getElementById('pf-name-display').textContent = name;
     document.getElementById('pf-email-display').textContent = user.email;
     document.getElementById('pf-name-input').value  = user.displayName||'';
@@ -1770,6 +1839,18 @@ document.getElementById('login-modal').addEventListener('click',function(e){ if(
 // ============ INIT ============
 renderHomeCats();
 renderHomeGrids();
+
+// ===== SPLASH DISMISS =====
+(function(){
+  const splash = document.getElementById('splash');
+  if(!splash) return;
+  // Hide splash after 2.2s — enough time for all animations to complete
+  setTimeout(function(){
+    splash.classList.add('hide');
+    // Remove from DOM after fade-out transition finishes
+    setTimeout(function(){ splash.remove(); }, 650);
+  }, 2200);
+})();
 </script>
 </body>
 </html>
